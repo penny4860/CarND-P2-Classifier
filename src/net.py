@@ -52,21 +52,20 @@ class Model:
 
         print ("Train Start!!")
         # Todo : batch 로 나누는 구조
-        with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
+        self.sess.run(tf.global_variables_initializer())
 
-            epoch = 0
-            while train_set.epochs_completed < n_epoch:
-                batch_xs, batch_ys = train_set.next_batch(self.batch_size)
+        epoch = 0
+        while train_set.epochs_completed < n_epoch:
+            batch_xs, batch_ys = train_set.next_batch(self.batch_size)
 
-                _, cost_val = sess.run([train_op, cost], feed_dict={self.X: batch_xs, self.Y: batch_ys, self._is_training: True})
-                # print ("train cost: ", cost_val)
+            _, cost_val = self.sess.run([train_op, cost], feed_dict={self.X: batch_xs, self.Y: batch_ys, self._is_training: True})
+            # print ("train cost: ", cost_val)
 
-                if epoch != train_set.epochs_completed:
-                    epoch += 1
-                    accuracy = sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
-                    print ("{}-epoch completed. validation accuracy : {}".format(train_set.epochs_completed, accuracy))
-            saver.save(sess, save_file)
+            if epoch != train_set.epochs_completed:
+                epoch += 1
+                accuracy = self.sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
+                print ("{}-epoch completed. validation accuracy : {}".format(train_set.epochs_completed, accuracy))
+        saver.save(self.sess, save_file)
 
 
 class ConvNetBatchNorm(Model):

@@ -9,8 +9,8 @@ import utils
 if __name__ == '__main__':
     FILENAME = "dataset/train_32x32.mat"
     # (N, 32, 32, 3), (N, 1)
-    images, labels = utils.load_dataset(FILENAME)
-    print(images.shape, labels.shape)
+    images, labels, images_val, labels_val = utils.load_dataset(FILENAME)
+    print(images.shape, labels.shape, images_val.shape, labels_val.shape)
     
     import matplotlib.pyplot as plt
     

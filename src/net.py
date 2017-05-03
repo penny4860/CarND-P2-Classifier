@@ -39,7 +39,7 @@ class Model:
         saver = tf.train.Saver()
         saver.restore(self.sess, save_file)
 
-    def train(self, train_set, val_set, save_file, n_epoch, load_file=None):
+    def train(self, train_set, val_set, n_epoch, save_file=None, load_file=None):
         saver = tf.train.Saver()
         cost = self.cost()
         optimizer = tf.train.AdamOptimizer(0.001, name="ADAM")
@@ -49,23 +49,14 @@ class Model:
         correct_prediction = tf.equal(tf.argmax(self.Y_pred, 1), tf.argmax(self.Y, 1))
         accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-
         print ("Train Start!!")
         # Todo : batch 로 나누는 구조
+        self.sess.run(tf.global_variables_initializer())
         if load_file:
-            self.sess.run(tf.global_variables_initializer())
-            # variables_to_restore = slim.get_variables_to_restore(include=["conv1"], exclude=["ADAM:0", "ADAM_1:0"])
-            #variables_to_restore = tf.get_collection(slim.variables.VARIABLES_TO_RESTORE)
-            
             weights = tf.contrib.framework.get_variables_by_name('weights')
             biases = tf.contrib.framework.get_variables_by_name('biases')
-            
-            for var in weights+biases:
-                print(var.name)
             init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, weights+biases)
             self.sess.run(init_assign_op, init_feed_dict)
-        else:
-            self.sess.run(tf.global_variables_initializer())
 
         epoch = 0
         while train_set.epochs_completed < n_epoch:
@@ -78,7 +69,8 @@ class Model:
                 epoch += 1
                 accuracy = self.sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
                 print ("{}-epoch completed. validation accuracy : {}".format(train_set.epochs_completed, accuracy))
-        saver.save(self.sess, save_file)
+        if save_file:
+            saver.save(self.sess, save_file)
 
 
 class ConvNetBatchNorm(Model):

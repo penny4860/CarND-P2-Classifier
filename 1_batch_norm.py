@@ -14,13 +14,13 @@ if __name__ == '__main__':
     tf.reset_default_graph()
     cls = net.ConvNetBatchNorm(BATCH_SIZE)
     data_train, data_val = utils.load_dataset(FILENAME)
-    cls.train(data_train, data_val, "model2.ckpt", 5)
+    cls.train(data_train, data_val, 5)
 
     # 2. without BatchNorm : 75% in 5 epoches
     tf.reset_default_graph()
     cls = net.ConvNet(BATCH_SIZE)
     data_train, data_val = utils.load_dataset(FILENAME)
-    cls.train(data_train, data_val, "model1.ckpt", 5)
+    cls.train(data_train, data_val, 5)
 
 #             # Save the current model if the maximum accuracy is updated
 #             if validation_accuracy > max_acc:

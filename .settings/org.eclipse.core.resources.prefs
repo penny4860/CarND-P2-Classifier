@@ -2,4 +2,5 @@ eclipse.preferences.version=1
 encoding/1_dataset.py=utf-8
 encoding/2_train.py=utf-8
 encoding/models.py=utf-8
+encoding/net.py=utf-8
 encoding/utils.py=utf-8

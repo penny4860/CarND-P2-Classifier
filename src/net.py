@@ -32,6 +32,20 @@ class Model:
     def cost(self):
         pass
 
+    def evaluate(self, images, labels):
+        """
+        # Args
+            images : (N, n_rows, n_cols, n_ch)
+            labels : (N, n_categories)
+        # Returns
+            accuracy : float
+        """
+        # Get accuracy of model
+        correct_prediction = tf.equal(tf.argmax(self.Y_pred, 1), tf.argmax(self.Y, 1))
+        accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        accuracy = self.sess.run(accuracy_op, feed_dict={self.X: images, self.Y: labels, self._is_training: False})
+        return accuracy
+
     def load_params(self, save_file):
         """Model.sess 에 save_file 에 저장되어있는 parameter 를 restore 하는 함수."""
 
@@ -45,10 +59,6 @@ class Model:
         optimizer = tf.train.AdamOptimizer(0.001, name="ADAM")
         train_op = optimizer.minimize(cost)
         
-        # Get accuracy of model
-        correct_prediction = tf.equal(tf.argmax(self.Y_pred, 1), tf.argmax(self.Y, 1))
-        accuracy_op = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
         print ("Train Start!!")
         # Todo : batch 로 나누는 구조
         self.sess.run(tf.global_variables_initializer())
@@ -67,7 +77,8 @@ class Model:
 
             if epoch != train_set.epochs_completed:
                 epoch += 1
-                accuracy = self.sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
+                # accuracy = self.sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
+                accuracy = self.evaluate(val_set.images, val_set.labels)
                 print ("{}-epoch completed. validation accuracy : {}".format(train_set.epochs_completed, accuracy))
         if save_file:
             saver.save(self.sess, save_file)

@@ -21,7 +21,7 @@ if __name__ == '__main__':
     y = tf.placeholder(tf.float32, [None, 10])
  
     # Predict
-    y_pred = cnn_model_batch_norm(x)
+    y_pred = cnn_model_batch_norm(x, is_training)
  
     cost_op = slim.losses.softmax_cross_entropy(y_pred, y)
  

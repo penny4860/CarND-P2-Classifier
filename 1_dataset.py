@@ -11,4 +11,9 @@ if __name__ == '__main__':
     # (N, 32, 32, 3), (N, 1)
     images, labels = utils.load_dataset(FILENAME)
     print(images.shape, labels.shape)
-
+    
+    import matplotlib.pyplot as plt
+    
+    plt.imshow(images[0])
+    print(labels[0])
+    plt.show()

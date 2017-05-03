@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import utils
-import tensorflow as tf
-import tensorflow.contrib.slim as slim
-from models import cnn_model_batch_norm
+import net
+
 
 BATCH_SIZE = 120
 
@@ -14,7 +13,6 @@ if __name__ == '__main__':
     data_train, data_val = utils.load_dataset(FILENAME)
 
 
-    import net
     cls = net.ConvNetBatchNorm(BATCH_SIZE)
     cls.train(data_train, data_val, "model.ckpt", 5)
  

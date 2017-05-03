@@ -46,12 +46,15 @@ class Model:
         accuracy = self.sess.run(accuracy_op, feed_dict={self.X: images, self.Y: labels, self._is_training: False})
         return accuracy
 
-    def load_params(self, save_file):
-        """Model.sess 에 save_file 에 저장되어있는 parameter 를 restore 하는 함수."""
+    def load_params(self, load_file):
+        """network parameter 를 load 하는 함수. """
+        
+        # Variable 중에서 naming 이 weights, biases 로 되어있는 Variable 객체만 file 에 저장되어있는 value 로 restore.
+        weights = tf.contrib.framework.get_variables_by_name('weights')
+        biases = tf.contrib.framework.get_variables_by_name('biases')
+        init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, weights+biases)
+        self.sess.run(init_assign_op, init_feed_dict)
 
-        # The file path to save the data
-        saver = tf.train.Saver()
-        saver.restore(self.sess, save_file)
 
     def train(self, train_set, val_set, n_epoch, save_file=None, load_file=None):
         saver = tf.train.Saver()
@@ -63,10 +66,7 @@ class Model:
         # Todo : batch 로 나누는 구조
         self.sess.run(tf.global_variables_initializer())
         if load_file:
-            weights = tf.contrib.framework.get_variables_by_name('weights')
-            biases = tf.contrib.framework.get_variables_by_name('biases')
-            init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, weights+biases)
-            self.sess.run(init_assign_op, init_feed_dict)
+            self.load_params(load_file)
 
         epoch = 0
         while train_set.epochs_completed < n_epoch:

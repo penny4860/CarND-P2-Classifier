@@ -102,6 +102,7 @@ class ConvNetBatchNorm(Model):
 
     def cost(self):
         # cost = tf.reduce_mean(tf.square(tf.subtract(self.Y_pred, self.Y)))
-        cost_op = slim.losses.softmax_cross_entropy(self.Y_pred, self.Y)
+        cost_op = tf.nn.softmax_cross_entropy_with_logits(logits=self.Y_pred, labels=self.Y)
         return cost_op
+
 

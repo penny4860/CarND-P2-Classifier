@@ -2,19 +2,26 @@
 
 import utils
 import net
-
+import tensorflow as tf
 
 BATCH_SIZE = 120
 
 if __name__ == '__main__':
     FILENAME = "dataset/train_32x32.mat"
     # (N, 32, 32, 3), (N, 1)
-    #images, labels, images_val, labels_val = utils.load_dataset(FILENAME)
+
+    # 1. without BatchNorm
+    tf.reset_default_graph()
+    cls = net.ConvNet(BATCH_SIZE)
     data_train, data_val = utils.load_dataset(FILENAME)
+    cls.train(data_train, data_val, "model1.ckpt", 2)
 
-
+    # 2. with BatchNorm
+    tf.reset_default_graph()
     cls = net.ConvNetBatchNorm(BATCH_SIZE)
-    cls.train(data_train, data_val, "model.ckpt", 5)
+    data_train, data_val = utils.load_dataset(FILENAME)
+    cls.train(data_train, data_val, "model2.ckpt", 5)
+
  
 #             # Save the current model if the maximum accuracy is updated
 #             if validation_accuracy > max_acc:

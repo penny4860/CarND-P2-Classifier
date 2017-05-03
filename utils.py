@@ -14,8 +14,8 @@ def load_dataset(filename):
     labels = data_dict["y"].reshape(-1,)
     labels[labels==10] = 0
     
-    one_hot_encoding = np.zeros((len(labels), 10))
-    one_hot_encoding[np.arange(len(labels)), labels] = 1
-    one_hot_encoding = one_hot_encoding.reshape(-1, 10)
+    one_hot_labels = np.zeros((len(labels), 10))
+    one_hot_labels[np.arange(len(labels)), labels] = 1
+    one_hot_labels = one_hot_labels.reshape(-1, 10)
 
-    return images, one_hot_encoding
+    return images[:60000], one_hot_labels[:60000], images[60000:], one_hot_labels[60000:],

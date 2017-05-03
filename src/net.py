@@ -39,10 +39,10 @@ class Model:
         saver = tf.train.Saver()
         saver.restore(self.sess, save_file)
 
-    def train(self, train_set, val_set, save_file, n_epoch):
+    def train(self, train_set, val_set, save_file, n_epoch, load_file=None):
         saver = tf.train.Saver()
         cost = self.cost()
-        optimizer = tf.train.AdamOptimizer(0.001)
+        optimizer = tf.train.AdamOptimizer(0.001, name="ADAM")
         train_op = optimizer.minimize(cost)
         
         # Get accuracy of model
@@ -52,7 +52,20 @@ class Model:
 
         print ("Train Start!!")
         # Todo : batch 로 나누는 구조
-        self.sess.run(tf.global_variables_initializer())
+        if load_file:
+            self.sess.run(tf.global_variables_initializer())
+            # variables_to_restore = slim.get_variables_to_restore(include=["conv1"], exclude=["ADAM:0", "ADAM_1:0"])
+            #variables_to_restore = tf.get_collection(slim.variables.VARIABLES_TO_RESTORE)
+            
+            weights = tf.contrib.framework.get_variables_by_name('weights')
+            biases = tf.contrib.framework.get_variables_by_name('biases')
+            
+            for var in weights+biases:
+                print(var.name)
+            init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, weights+biases)
+            self.sess.run(init_assign_op, init_feed_dict)
+        else:
+            self.sess.run(tf.global_variables_initializer())
 
         epoch = 0
         while train_set.epochs_completed < n_epoch:

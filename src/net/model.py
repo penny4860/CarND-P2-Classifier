@@ -68,9 +68,13 @@ class _Model:
         self.sess.run(tf.global_variables_initializer())
         if load_file:
             self.load_params(load_file)
+            accuracy = self.evaluate(val_set.images, val_set.labels)
+            print ("Network parameter loaded. validation accuracy : {}".format(accuracy))
+            max_acc = accuracy
+        else:
+            max_acc = 0
 
         epoch = 0
-        max_acc = 0
         while train_set.epochs_completed < n_epoch:
             batch_xs, batch_ys = train_set.next_batch(self.batch_size)
 

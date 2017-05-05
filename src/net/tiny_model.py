@@ -5,8 +5,7 @@
 
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
-from single_shot.net.model import _Model
-
+from .model import _Model
 
 class ConvNetBatchNorm(_Model):
     def build(self):

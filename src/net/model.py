@@ -78,7 +78,6 @@ class _Model:
 
             if epoch != train_set.epochs_completed:
                 epoch += 1
-                # accuracy = self.sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
                 accuracy = self.evaluate(val_set.images, val_set.labels)
                 print ("{}-epoch completed. validation accuracy : {}".format(train_set.epochs_completed, accuracy))
         if save_file:

@@ -22,12 +22,6 @@ if __name__ == '__main__':
     data_train, data_val = utils.load_dataset(FILENAME)
     cls.train(data_train, data_val, 2)
 
-#             # Save the current model if the maximum accuracy is updated
-#             if validation_accuracy > max_acc:
-#                 max_acc = validation_accuracy
-#                 save_path = saver.save(sess, MODEL_DIRECTORY)
-#                 print("Model updated and saved in file: %s" % save_path)
- 
     print("Finished!")
 
     

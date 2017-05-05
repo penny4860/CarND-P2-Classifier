@@ -68,6 +68,11 @@ class _Model:
         self.sess.run(tf.global_variables_initializer())
         if load_file:
             self.load_params(load_file)
+            accuracy = self.evaluate(val_set.images, val_set.labels)
+            print ("Network parameter loaded. validation accuracy : {}".format(accuracy))
+            max_acc = accuracy
+        else:
+            max_acc = 0
 
         epoch = 0
         while train_set.epochs_completed < n_epoch:
@@ -78,8 +83,11 @@ class _Model:
 
             if epoch != train_set.epochs_completed:
                 epoch += 1
-                # accuracy = self.sess.run(accuracy_op, feed_dict={self.X: val_set.images, self.Y: val_set.labels, self._is_training: False})
                 accuracy = self.evaluate(val_set.images, val_set.labels)
                 print ("{}-epoch completed. validation accuracy : {}".format(train_set.epochs_completed, accuracy))
-        if save_file:
-            saver.save(self.sess, save_file)
+                
+                # Save the current model if the maximum accuracy is updated
+                if max_acc < accuracy and save_file:
+                    max_acc = accuracy
+                    saver.save(self.sess, save_file)
+                    print("Model updated and saved in file: %s" % save_file)

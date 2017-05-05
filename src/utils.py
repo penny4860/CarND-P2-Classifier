@@ -18,8 +18,8 @@ def load_dataset(filename):
     one_hot_labels[np.arange(len(labels)), labels] = 1
     one_hot_labels = one_hot_labels.reshape(-1, 10)
     
-    train_set = Dataset(images[:1000], one_hot_labels[:1000])
-    validation_set = Dataset(images[1000:1200], one_hot_labels[1000:1200])
+    train_set = Dataset(images[:60000], one_hot_labels[:60000])
+    validation_set = Dataset(images[60000:], one_hot_labels[60000:])
 
     return train_set, validation_set
 

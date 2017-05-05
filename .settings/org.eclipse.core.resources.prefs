@@ -1,5 +1,4 @@
 eclipse.preferences.version=1
-encoding//src/net.py=utf-8
 encoding//src/net/model.py=utf-8
 encoding//src/net/single_shot_model.py=utf-8
 encoding//src/net/tiny_model.py=utf-8

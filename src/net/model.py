@@ -74,7 +74,7 @@ class _Model:
             batch_xs, batch_ys = train_set.next_batch(self.batch_size)
 
             _, cost_val = self.sess.run([train_op, cost], feed_dict={self.X: batch_xs, self.Y: batch_ys, self._is_training: True})
-            print ("train cost: ", cost_val)
+            # print ("train cost: ", cost_val)
 
             if epoch != train_set.epochs_completed:
                 epoch += 1

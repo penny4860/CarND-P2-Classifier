@@ -27,7 +27,7 @@ class _Model:
             sess : tf.Session()
             X : np.array
         """
-        ys = self.sess.run(self.Y_pred, feed_dict={self.X: X})
+        ys = self.sess.run(self.Y_pred, feed_dict={self.X: X, self._is_training: False})
         return ys
 
     def cost(self):

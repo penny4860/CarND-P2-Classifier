@@ -54,11 +54,12 @@ class _Model:
         reader = pywrap_tensorflow.NewCheckpointReader(load_file)
         saved_variable_names = list(reader.get_variable_to_shape_map().keys())
         saved_variables = []
+
+        # 2. Get the variables by name
         for n in saved_variable_names:
             saved_variables += tf.contrib.framework.get_variables_by_name(n)
-        for v in saved_variables:
-            print(v.name)
 
+        # 3. Init from saved file
         init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, saved_variables)
         self.sess.run(init_assign_op, init_feed_dict)
 

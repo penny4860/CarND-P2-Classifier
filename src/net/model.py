@@ -49,13 +49,18 @@ class _Model:
 
     def load_params(self, load_file):
         """network parameter 를 load 하는 함수. """
-        
-        # Variable 중에서 naming 이 weights, biases 로 되어있는 Variable 객체만 file 에 저장되어있는 value 로 restore.
-        weights = tf.contrib.framework.get_variables_by_name('weights')
-        biases = tf.contrib.framework.get_variables_by_name('biases')
-        init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, weights+biases)
-        self.sess.run(init_assign_op, init_feed_dict)
+        # 1. load save vars
+        from tensorflow.python import pywrap_tensorflow
+        reader = pywrap_tensorflow.NewCheckpointReader(load_file)
+        saved_variable_names = list(reader.get_variable_to_shape_map().keys())
+        saved_variables = []
+        for n in saved_variable_names:
+            saved_variables += tf.contrib.framework.get_variables_by_name(n)
+        for v in saved_variables:
+            print(v.name)
 
+        init_assign_op, init_feed_dict = slim.assign_from_checkpoint(load_file, saved_variables)
+        self.sess.run(init_assign_op, init_feed_dict)
 
     def train(self, train_set, val_set, n_epoch, save_file=None, load_file=None):
         saver = tf.train.Saver()

@@ -5,6 +5,7 @@ from tensorflow.contrib.layers import flatten
 import tensorflow as tf
 from sklearn.utils import shuffle
 
+# Todo : https://github.com/udacity/CarND-LeNet-Lab/blob/master/LeNet-Lab-Solution.ipynb
 
 def load_dataset(files = ["../dataset/train.p",
                           "../dataset/valid.p",

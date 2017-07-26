@@ -39,7 +39,7 @@ class Model(object):
         return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=one_hot_y))
 
 
-def train(model):
+def train(model, X_train, y_train):
     optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss)
 
     init = tf.global_variables_initializer()
@@ -49,23 +49,25 @@ def train(model):
     batch_size = 100
     total_batch = int(mnist.train.num_examples / batch_size)
     
+    num_examples = len(X_train)
+    
     for epoch in range(5):
         total_cost = 0
-    
-        for i in range(total_batch):
-            batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-            # 이미지 데이터를 CNN 모델을 위한 자료형태인 [28 28 1] 의 형태로 재구성합니다.
-            batch_xs = batch_xs.reshape(-1, 28, 28, 1)
-    
+        
+        # X_train, y_train = shuffle(X_train, y_train)
+        for offset in range(0, num_examples, batch_size):
+            end = offset + batch_size
+            batch_x, batch_y = X_train[offset:end], y_train[offset:end]
+
             _, cost_val = sess.run([optimizer, model.loss],
-                                   feed_dict={model.X: batch_xs,
-                                              model.Y: batch_ys})
+                                   feed_dict={model.X: batch_x,
+                                              model.Y: batch_y})
             total_cost += cost_val
     
         print('Epoch:', '%04d' % (epoch + 1),
               'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
     
-    print('최적화 완료!')
+    print('Training done')
     saver = tf.train.Saver()
     saver.save(sess, 'models/cnn')
     # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
@@ -79,12 +81,14 @@ def evaluate(model):
     
         is_correct = tf.equal(tf.argmax(model.logits, 1), model.Y)
         accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
-        print('정확도:', sess.run(accuracy,
+        print('Accuracy: ', sess.run(accuracy,
                                 feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),
                                            model.Y: mnist.test.labels}))
 
 
+train_images = mnist.train.images.reshape(-1, 28, 28, 1)
+
 model = Model()
-train(model)
+train(model, train_images, mnist.train.labels)
 evaluate(model)
 

@@ -47,7 +47,7 @@ def train(model):
     batch_size = 100
     total_batch = int(mnist.train.num_examples / batch_size)
     
-    for epoch in range(15):
+    for epoch in range(5):
         total_cost = 0
     
         for i in range(total_batch):
@@ -65,17 +65,25 @@ def train(model):
               'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
     
     print('최적화 완료!')
-    
-    is_correct = tf.equal(tf.argmax(model, 1), tf.argmax(model.Y, 1))
-    accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
-    print('정확도:', sess.run(accuracy,
-                            feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),
-                                       model.Y: mnist.test.labels,
-                                       model.keep_prob: 1}))
+    saver = tf.train.Saver()
+    saver.save(sess, 'models')
     sess.close()
+
+def evaluate(model):
+    saver = tf.train.Saver()
+
+    with tf.Session() as sess:
+        saver.restore(sess, tf.train.latest_checkpoint('models'))
+    
+        is_correct = tf.equal(tf.argmax(model, 1), tf.argmax(model.Y, 1))
+        accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+        print('정확도:', sess.run(accuracy,
+                                feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),
+                                           model.Y: mnist.test.labels,
+                                           model.keep_prob: 1}))
 
 
 model = Model()
 train(model)
-
+evaluate(model)
 

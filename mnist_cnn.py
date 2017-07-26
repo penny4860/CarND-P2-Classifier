@@ -64,23 +64,20 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
         
             print('Epoch:', '%04d' % (epoch + 1),
                   'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
+    
+            # evaluate(model, X_train, y_train)
         
         print('Training done')
         saver = tf.train.Saver()
         saver.save(sess, 'models/cnn')
         # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
-def evaluate(model, images, labels):
-    saver = tf.train.Saver()
-
-    with tf.Session() as sess:
-        saver.restore(sess, tf.train.latest_checkpoint('models'))
-    
-        is_correct = tf.equal(tf.argmax(model.logits, 1), model.Y)
-        accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
-        print('Accuracy: ', sess.run(accuracy,
-                                feed_dict={model.X: images,
-                                           model.Y: labels}))
+def evaluate(model, images, labels, session):
+    is_correct = tf.equal(tf.argmax(model.logits, 1), model.Y)
+    accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+    print('Accuracy: ', session.run(accuracy,
+                                    feed_dict={model.X: images,
+                                               model.Y: labels}))
 
 
 train_images = mnist.train.images.reshape(-1, 28, 28, 1)
@@ -88,5 +85,9 @@ test_images = mnist.test.images.reshape(-1, 28, 28, 1)
 
 model = Model()
 train(model, train_images, mnist.train.labels)
-evaluate(model, test_images, mnist.test.labels)
+
+saver = tf.train.Saver()
+with tf.Session() as sess:
+    saver.restore(sess, tf.train.latest_checkpoint('models'))
+    evaluate(model, test_images, mnist.test.labels, sess)
 

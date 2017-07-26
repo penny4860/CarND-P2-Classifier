@@ -17,33 +17,21 @@ class Model(object):
 
     def build(self):
         W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
-        # tf.nn.conv2d 를 이용해 한칸씩 움직이는 컨볼루션 레이어를 쉽게 만들 수 있습니다.
-        # padding='SAME' 은 커널 슬라이딩시 최외곽에서 한칸 밖으로 더 움직이는 옵션
         L1 = tf.nn.conv2d(self.X, W1, strides=[1, 1, 1, 1], padding='SAME')
         L1 = tf.nn.relu(L1)
-        # Pooling 역시 tf.nn.max_pool 을 이용하여 쉽게 구성할 수 있습니다.
         L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        # L1 = tf.nn.dropout(L1, keep_prob)
-        
-        # L2 Conv shape=(?, 14, 14, 64)
-        #    Pool     ->(?, 7, 7, 64)
-        # W2 의 [3, 3, 32, 64] 에서 32 는 L1 에서 출력된 W1 의 마지막 차원, 필터의 크기 입니다.
+
         W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
         L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
         L2 = tf.nn.relu(L2)
         L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        # L2 = tf.nn.dropout(L2, keep_prob)
-        
-        # FC 레이어: 입력값 7x7x64 -> 출력값 256
-        # Full connect를 위해 직전의 Pool 사이즈인 (?, 7, 7, 64) 를 참고하여 차원을 줄여줍니다.
-        #    Reshape  ->(?, 256)
+
         W3 = tf.Variable(tf.random_normal([7 * 7 * 64, 256], stddev=0.01))
         L3 = tf.reshape(L2, [-1, 7 * 7 * 64])
         L3 = tf.matmul(L3, W3)
         L3 = tf.nn.relu(L3)
         L3 = tf.nn.dropout(L3, self.keep_prob)
         
-        # 최종 출력값 L3 에서의 출력 256개를 입력값으로 받아서 0~9 레이블인 10개의 출력값을 만듭니다.
         W4 = tf.Variable(tf.random_normal([256, 10], stddev=0.01))
         model = tf.matmul(L3, W4)
         return model

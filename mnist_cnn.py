@@ -66,7 +66,8 @@ def train(model):
     
     print('최적화 완료!')
     saver = tf.train.Saver()
-    saver.save(sess, 'models')
+    saver.save(sess, 'models/cnn')
+    # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
     sess.close()
 
 def evaluate(model):

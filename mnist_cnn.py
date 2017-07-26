@@ -36,47 +36,46 @@ class Model(object):
         model = tf.matmul(L3, W4)
         return model
 
+
+def train(model):
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss)
+
+    init = tf.global_variables_initializer()
+    sess = tf.Session()
+    sess.run(init)
+    
+    batch_size = 100
+    total_batch = int(mnist.train.num_examples / batch_size)
+    
+    for epoch in range(15):
+        total_cost = 0
+    
+        for i in range(total_batch):
+            batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+            # 이미지 데이터를 CNN 모델을 위한 자료형태인 [28 28 1] 의 형태로 재구성합니다.
+            batch_xs = batch_xs.reshape(-1, 28, 28, 1)
+    
+            _, cost_val = sess.run([optimizer, model.loss],
+                                   feed_dict={model.X: batch_xs,
+                                              model.Y: batch_ys,
+                                              model.keep_prob: 0.7})
+            total_cost += cost_val
+    
+        print('Epoch:', '%04d' % (epoch + 1),
+              'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
+    
+    print('최적화 완료!')
+    
+    is_correct = tf.equal(tf.argmax(model, 1), tf.argmax(model.Y, 1))
+    accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+    print('정확도:', sess.run(accuracy,
+                            feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),
+                                       model.Y: mnist.test.labels,
+                                       model.keep_prob: 1}))
+    sess.close()
+
+
 model = Model()
+train(model)
 
-optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss)
-# 최적화 함수를 RMSPropOptimizer 로 바꿔서 결과를 확인해봅시다.
-# optimizer = tf.train.RMSPropOptimizer(0.001, 0.9).minimize(cost)
 
-#########
-# 신경망 모델 학습
-######
-init = tf.global_variables_initializer()
-sess = tf.Session()
-sess.run(init)
-
-batch_size = 100
-total_batch = int(mnist.train.num_examples / batch_size)
-
-for epoch in range(15):
-    total_cost = 0
-
-    for i in range(total_batch):
-        batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-        # 이미지 데이터를 CNN 모델을 위한 자료형태인 [28 28 1] 의 형태로 재구성합니다.
-        batch_xs = batch_xs.reshape(-1, 28, 28, 1)
-
-        _, cost_val = sess.run([optimizer, model.loss],
-                               feed_dict={model.X: batch_xs,
-                                          model.Y: batch_ys,
-                                          model.keep_prob: 0.7})
-        total_cost += cost_val
-
-    print('Epoch:', '%04d' % (epoch + 1),
-          'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
-
-print('최적화 완료!')
-
-#########
-# 결과 확인
-######
-is_correct = tf.equal(tf.argmax(model, 1), tf.argmax(model.Y, 1))
-accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
-print('정확도:', sess.run(accuracy,
-                        feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),
-                                   model.Y: mnist.test.labels,
-                                   model.keep_prob: 1}))

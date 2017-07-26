@@ -73,6 +73,11 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
         # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
 def evaluate(model, images, labels, session, ckpt_directory=None):
+    # Todo : session 을 copy해서 별도의 객체를 생성하자.
+    # session arg 를 그대로 사용하면 함수내부에서 session이 변경될 수 있다.
+    
+    # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
+    # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
     is_correct = tf.equal(tf.argmax(model.logits, 1), model.Y)
     accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
     

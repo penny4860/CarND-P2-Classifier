@@ -10,7 +10,6 @@ class Model(object):
     def __init__(self):
         self.X = tf.placeholder(tf.float32, [None, 28, 28, 1])
         self.Y = tf.placeholder(tf.float32, [None, 10])
-        self.keep_prob = tf.placeholder(tf.float32)
 
         self.output = self.build()
         self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.Y))
@@ -30,7 +29,6 @@ class Model(object):
         L3 = tf.reshape(L2, [-1, 7 * 7 * 64])
         L3 = tf.matmul(L3, W3)
         L3 = tf.nn.relu(L3)
-        L3 = tf.nn.dropout(L3, self.keep_prob)
         
         W4 = tf.Variable(tf.random_normal([256, 10], stddev=0.01))
         model = tf.matmul(L3, W4)
@@ -57,8 +55,7 @@ def train(model):
     
             _, cost_val = sess.run([optimizer, model.loss],
                                    feed_dict={model.X: batch_xs,
-                                              model.Y: batch_ys,
-                                              model.keep_prob: 0.7})
+                                              model.Y: batch_ys})
             total_cost += cost_val
     
         print('Epoch:', '%04d' % (epoch + 1),
@@ -80,8 +77,7 @@ def evaluate(model):
         accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
         print('정확도:', sess.run(accuracy,
                                 feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),
-                                           model.Y: mnist.test.labels,
-                                           model.keep_prob: 1}))
+                                           model.Y: mnist.test.labels}))
 
 
 model = Model()

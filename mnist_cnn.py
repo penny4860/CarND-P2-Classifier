@@ -1,5 +1,6 @@
 # 이미지 처리 분야에서 가장 유명한 신경망 모델인 CNN 을 이용하여 더 높은 인식률을 만들어봅니다.
 import tensorflow as tf
+from sklearn.utils import shuffle
 
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("./mnist/data/", one_hot=False)
@@ -54,7 +55,7 @@ def train(model, X_train, y_train):
     for epoch in range(5):
         total_cost = 0
         
-        # X_train, y_train = shuffle(X_train, y_train)
+        X_train, y_train = shuffle(X_train, y_train)
         for offset in range(0, num_examples, batch_size):
             end = offset + batch_size
             batch_x, batch_y = X_train[offset:end], y_train[offset:end]

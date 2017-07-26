@@ -2,14 +2,14 @@
 import tensorflow as tf
 
 from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("./mnist/data/", one_hot=True)
+mnist = input_data.read_data_sets("./mnist/data/", one_hot=False)
 
 
 class Model(object):
 
     def __init__(self):
         self.X = tf.placeholder(tf.float32, [None, 28, 28, 1])
-        self.Y = tf.placeholder(tf.float32, [None, 10])
+        self.Y = tf.placeholder(tf.int64, [None])
 
         self.logits = self._build()
         self.loss = self._loss_operation()
@@ -35,7 +35,8 @@ class Model(object):
         return model
 
     def _loss_operation(self):
-        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.Y))
+        one_hot_y = tf.one_hot(self.Y, 10)
+        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=one_hot_y))
 
 
 def train(model):
@@ -76,7 +77,7 @@ def evaluate(model):
     with tf.Session() as sess:
         saver.restore(sess, tf.train.latest_checkpoint('models'))
     
-        is_correct = tf.equal(tf.argmax(model.logits, 1), tf.argmax(model.Y, 1))
+        is_correct = tf.equal(tf.argmax(model.logits, 1), model.Y)
         accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
         print('정확도:', sess.run(accuracy,
                                 feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),

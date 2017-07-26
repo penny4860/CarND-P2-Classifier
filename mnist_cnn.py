@@ -76,7 +76,7 @@ def evaluate(model):
     with tf.Session() as sess:
         saver.restore(sess, tf.train.latest_checkpoint('models'))
     
-        is_correct = tf.equal(tf.argmax(model, 1), tf.argmax(model.Y, 1))
+        is_correct = tf.equal(tf.argmax(model.output, 1), tf.argmax(model.Y, 1))
         accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
         print('정확도:', sess.run(accuracy,
                                 feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),

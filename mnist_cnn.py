@@ -11,10 +11,10 @@ class Model(object):
         self.X = tf.placeholder(tf.float32, [None, 28, 28, 1])
         self.Y = tf.placeholder(tf.float32, [None, 10])
 
-        self.output = self.build()
-        self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.output, labels=self.Y))
+        self.logits = self._build()
+        self.loss = self._loss_operation()
 
-    def build(self):
+    def _build(self):
         W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
         L1 = tf.nn.conv2d(self.X, W1, strides=[1, 1, 1, 1], padding='SAME')
         L1 = tf.nn.relu(L1)
@@ -33,6 +33,9 @@ class Model(object):
         W4 = tf.Variable(tf.random_normal([256, 10], stddev=0.01))
         model = tf.matmul(L3, W4)
         return model
+
+    def _loss_operation(self):
+        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=self.Y))
 
 
 def train(model):
@@ -73,7 +76,7 @@ def evaluate(model):
     with tf.Session() as sess:
         saver.restore(sess, tf.train.latest_checkpoint('models'))
     
-        is_correct = tf.equal(tf.argmax(model.output, 1), tf.argmax(model.Y, 1))
+        is_correct = tf.equal(tf.argmax(model.logits, 1), tf.argmax(model.Y, 1))
         accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
         print('정확도:', sess.run(accuracy,
                                 feed_dict={model.X: mnist.test.images.reshape(-1, 28, 28, 1),

@@ -65,7 +65,7 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
             print('Epoch:', '%04d' % (epoch + 1),
                   'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
             
-            # evaluate(model, X_train, y_train)
+            evaluate(model, X_train, y_train, sess)
         
         print('Training done')
         saver = tf.train.Saver()
@@ -80,9 +80,9 @@ def evaluate(model, images, labels, session, ckpt_directory=None):
         saver = tf.train.Saver()
         saver.restore(session, tf.train.latest_checkpoint(ckpt_directory))
         
-        print('Accuracy: ', session.run(accuracy,
-                                        feed_dict={model.X: images,
-                                                   model.Y: labels}))
+    print('Accuracy: ', session.run(accuracy,
+                                    feed_dict={model.X: images,
+                                               model.Y: labels}))
 
 
 train_images = mnist.train.images.reshape(-1, 28, 28, 1)

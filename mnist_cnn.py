@@ -77,20 +77,31 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
         saver.save(sess, 'models/cnn')
         # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
-def evaluate(model, images, labels, session=None, ckpt_directory=None):
+def evaluate(model, images, labels, session=None, ckpt=None):
+    """
+    ckpt : str
+        ckpt directory or ckpt file
+    """
     # Todo : session 을 copy해서 별도의 객체를 생성하자.
     # session arg 를 그대로 사용하면 함수내부에서 session이 변경될 수 있다.
     
     # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
     # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
+    def _evaluate(sess):
+        if ckpt:
+            saver = tf.train.Saver()
+            saver.restore(sess, tf.train.latest_checkpoint(ckpt))
+            
+        print('Accuracy: ', sess.run(model.accuracy_op,
+                                        feed_dict={model.X: images,
+                                                   model.Y: labels}))
 
-    if ckpt_directory:
-        saver = tf.train.Saver()
-        saver.restore(session, tf.train.latest_checkpoint(ckpt_directory))
-        
-    print('Accuracy: ', session.run(model.accuracy_op,
-                                    feed_dict={model.X: images,
-                                               model.Y: labels}))
+    if session:
+        _evaluate(session)
+    else:
+        sess = tf.Session()
+        _evaluate(sess)
+        sess.close()
 
 
 train_images = mnist.train.images.reshape(-1, 28, 28, 1)
@@ -99,6 +110,5 @@ test_images = mnist.test.images.reshape(-1, 28, 28, 1)
 model = Model()
 train(model, train_images, mnist.train.labels)
 
-with tf.Session() as sess:
-    evaluate(model, test_images, mnist.test.labels, sess, 'models')
+evaluate(model, test_images, mnist.test.labels, ckpt='models')
 

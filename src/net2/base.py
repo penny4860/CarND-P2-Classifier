@@ -35,7 +35,7 @@ class _Model(object):
         return tf.reduce_mean(tf.cast(is_correct, tf.float32))
 
 
-def train(model, X_train, y_train, batch_size=100, n_epoches=5):
+def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
     optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op)
     init = tf.global_variables_initializer()
 
@@ -63,9 +63,12 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
             evaluate(model, X_train, y_train, sess)
         
         print('Training done')
-        saver = tf.train.Saver()
-        saver.save(sess, 'models/cnn')
-        # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
+        
+        if ckpt:
+            saver = tf.train.Saver()
+            saver.save(sess, ckpt)
+            # saver.save(sess, 'models/cnn')
+            # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
 def evaluate(model, images, labels, session=None, ckpt=None):
     """

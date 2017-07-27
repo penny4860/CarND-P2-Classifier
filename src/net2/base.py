@@ -1,5 +1,6 @@
 import tensorflow as tf
 from abc import ABCMeta, abstractmethod
+from sklearn.utils import shuffle
 
 class _Model(object):
     
@@ -63,3 +64,58 @@ class MnistCnn(_Model):
         one_hot_y = tf.one_hot(self.Y, 10)
         return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
 
+
+def train(model, X_train, y_train, batch_size=100, n_epoches=5):
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op)
+    init = tf.global_variables_initializer()
+
+    with tf.Session() as sess:
+        sess.run(init)
+        total_batch = len(X_train) / batch_size
+        num_examples = len(X_train)
+        
+        for epoch in range(n_epoches):
+            total_cost = 0
+            
+            X_train, y_train = shuffle(X_train, y_train)
+            for offset in range(0, num_examples, batch_size):
+                end = offset + batch_size
+                batch_x, batch_y = X_train[offset:end], y_train[offset:end]
+    
+                _, cost_val = sess.run([optimizer, model.loss_op],
+                                       feed_dict={model.X: batch_x,
+                                                  model.Y: batch_y})
+                total_cost += cost_val
+        
+            print('Epoch:', '%04d' % (epoch + 1),
+                  'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
+            
+            evaluate(model, X_train, y_train, sess)
+        
+        print('Training done')
+        saver = tf.train.Saver()
+        saver.save(sess, 'models/cnn')
+        # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
+
+def evaluate(model, images, labels, session=None, ckpt=None):
+    """
+    ckpt : str
+        ckpt directory or ckpt file
+    """
+    # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
+    # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
+    def _evaluate(sess):
+        if ckpt:
+            saver = tf.train.Saver()
+            saver.restore(sess, tf.train.latest_checkpoint(ckpt))
+            
+        print('Accuracy: ', sess.run(model.accuracy_op,
+                                        feed_dict={model.X: images,
+                                                   model.Y: labels}))
+
+    if session:
+        _evaluate(session)
+    else:
+        sess = tf.Session()
+        _evaluate(sess)
+        sess.close()

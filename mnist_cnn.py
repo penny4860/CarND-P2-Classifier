@@ -82,9 +82,6 @@ def evaluate(model, images, labels, session=None, ckpt=None):
     ckpt : str
         ckpt directory or ckpt file
     """
-    # Todo : session 을 copy해서 별도의 객체를 생성하자.
-    # session arg 를 그대로 사용하면 함수내부에서 session이 변경될 수 있다.
-    
     # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
     # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
     def _evaluate(sess):

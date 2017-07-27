@@ -1,57 +1,47 @@
-# 이미지 처리 분야에서 가장 유명한 신경망 모델인 CNN 을 이용하여 더 높은 인식률을 만들어봅니다.
 import tensorflow as tf
+from abc import ABCMeta, abstractmethod
 from sklearn.utils import shuffle
 
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("./mnist/data/", one_hot=False)
-
-
-class Model(object):
-
+class _Model(object):
+    
+    __metaclass__ = ABCMeta
+    
     def __init__(self):
-        self.X = tf.placeholder(tf.float32, [None, 28, 28, 1])
-        self.Y = tf.placeholder(tf.int64, [None])
+        self.X = self._create_input_placeholder()
+        self.Y = self._create_output_placeholder()
 
-        self.inference_op = self._inference_op()
-        self.loss_op = self._loss_op()
-        self.accuracy_op = self._accuracy_op()
+        self.inference_op = self._create_inference_op()
+        self.loss_op = self._create_loss_op()
+        self.accuracy_op = self._create_accuracy_op()
 
-    def _inference_op(self):
-        W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
-        L1 = tf.nn.conv2d(self.X, W1, strides=[1, 1, 1, 1], padding='SAME')
-        L1 = tf.nn.relu(L1)
-        L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    @abstractmethod
+    def _create_input_placeholder(self):
+        return tf.placeholder(tf.float32, [None, 28, 28, 1])
 
-        W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
-        L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
-        L2 = tf.nn.relu(L2)
-        L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    @abstractmethod
+    def _create_inference_op(self):
+        pass
 
-        W3 = tf.Variable(tf.random_normal([7 * 7 * 64, 256], stddev=0.01))
-        L3 = tf.reshape(L2, [-1, 7 * 7 * 64])
-        L3 = tf.matmul(L3, W3)
-        L3 = tf.nn.relu(L3)
-        
-        W4 = tf.Variable(tf.random_normal([256, 10], stddev=0.01))
-        model = tf.matmul(L3, W4)
-        return model
-
-    def _loss_op(self):
+    @abstractmethod
+    def _create_loss_op(self):
         one_hot_y = tf.one_hot(self.Y, 10)
         return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
 
-    def _accuracy_op(self):
+    def _create_output_placeholder(self):
+        return tf.placeholder(tf.int64, [None])
+
+    def _create_accuracy_op(self):
         is_correct = tf.equal(tf.argmax(self.inference_op, 1), self.Y)
         return tf.reduce_mean(tf.cast(is_correct, tf.float32))
-        
 
-def train(model, X_train, y_train, batch_size=100, n_epoches=5):
+
+def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
     optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op)
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
         sess.run(init)
-        total_batch = int(mnist.train.num_examples / batch_size)
+        total_batch = len(X_train) / batch_size
         num_examples = len(X_train)
         
         for epoch in range(n_epoches):
@@ -73,9 +63,17 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
             evaluate(model, X_train, y_train, sess)
         
         print('Training done')
-        saver = tf.train.Saver()
-        saver.save(sess, 'models/cnn')
-        # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
+        
+        if ckpt:
+            import os
+            directory = os.path.dirname(ckpt)
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+                
+            saver = tf.train.Saver()
+            saver.save(sess, ckpt)
+            # saver.save(sess, 'models/cnn')
+            # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
 def evaluate(model, images, labels, session=None, ckpt=None):
     """
@@ -99,13 +97,3 @@ def evaluate(model, images, labels, session=None, ckpt=None):
         sess = tf.Session()
         _evaluate(sess)
         sess.close()
-
-
-train_images = mnist.train.images.reshape(-1, 28, 28, 1)
-test_images = mnist.test.images.reshape(-1, 28, 28, 1)
-
-model = Model()
-train(model, train_images, mnist.train.labels)
-
-evaluate(model, test_images, mnist.test.labels, ckpt='models')
-

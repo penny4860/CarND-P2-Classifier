@@ -65,6 +65,11 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
         print('Training done')
         
         if ckpt:
+            import os
+            directory = os.path.dirname(ckpt)
+            if not os.path.exists(directory):
+                os.mkdir(directory)
+                
             saver = tf.train.Saver()
             saver.save(sess, ckpt)
             # saver.save(sess, 'models/cnn')

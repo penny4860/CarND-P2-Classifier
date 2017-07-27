@@ -92,7 +92,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         
             print('Epoch:', '%04d' % (epoch + 1),
                   'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
-            
+
+            # evaluate(model, X_train, y_train, sess)
             evaluate(model, X_val, y_val, sess)
         
         print('Training done')
@@ -133,17 +134,25 @@ def evaluate(model, images, labels, session=None, ckpt=None):
 ################################################################################################################
 
 class SignModel(_Model):
+#     Accuracy:  0.975774
+#     Accuracy:  0.800907
     def _create_input_placeholder(self):
         return tf.placeholder(tf.float32, [None, 32, 32, 3])
 
     def _create_inference_op(self):
-        W1 = tf.Variable(tf.random_normal([3, 3, 3, 32], stddev=0.01))
-        L1 = tf.nn.conv2d(self.X, W1, strides=[1, 1, 1, 1], padding='SAME')
+        W1_1 = tf.Variable(tf.random_normal([3, 3, 3, 32], stddev=0.01))
+        L1 = tf.nn.conv2d(self.X, W1_1, strides=[1, 1, 1, 1], padding='SAME')
+        L1 = tf.nn.relu(L1)
+        W1_2 = tf.Variable(tf.random_normal([3, 3, 32, 32], stddev=0.01))
+        L1 = tf.nn.conv2d(L1, W1_2, strides=[1, 1, 1, 1], padding='SAME')
         L1 = tf.nn.relu(L1)
         L1 = tf.nn.max_pool(L1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        W2 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
-        L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
+        W2_1 = tf.Variable(tf.random_normal([3, 3, 32, 64], stddev=0.01))
+        L2 = tf.nn.conv2d(L1, W2_1, strides=[1, 1, 1, 1], padding='SAME')
+        L2 = tf.nn.relu(L2)
+        W2_2 = tf.Variable(tf.random_normal([3, 3, 64, 64], stddev=0.01))
+        L2 = tf.nn.conv2d(L2, W2_2, strides=[1, 1, 1, 1], padding='SAME')
         L2 = tf.nn.relu(L2)
         L2 = tf.nn.max_pool(L2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
@@ -167,7 +176,7 @@ X_train, y_train, X_valid, y_valid, X_test, y_test = load_dataset()
 X_train_prep, X_test_prep, X_valid_prep = preprocess(X_train), preprocess(X_test), preprocess(X_valid)
 
 model = SignModel()
-train(model, X_train_prep, y_train, X_valid_prep, y_valid, ckpt='ckpts/cnn')
+train(model, X_train_prep, y_train, X_valid_prep, y_valid, batch_size=32, n_epoches=20, ckpt='ckpts/cnn')
 evaluate(model, X_test_prep, y_test, ckpt='ckpts')
 
 

@@ -12,10 +12,11 @@ class Model(object):
         self.X = tf.placeholder(tf.float32, [None, 28, 28, 1])
         self.Y = tf.placeholder(tf.int64, [None])
 
-        self.logits = self._build()
-        self.loss = self._loss_operation()
+        self.inference_op = self._inference_op()
+        self.loss_op = self._loss_op()
+        self.accuracy_op = self._accuracy_op()
 
-    def _build(self):
+    def _inference_op(self):
         W1 = tf.Variable(tf.random_normal([3, 3, 1, 32], stddev=0.01))
         L1 = tf.nn.conv2d(self.X, W1, strides=[1, 1, 1, 1], padding='SAME')
         L1 = tf.nn.relu(L1)
@@ -35,13 +36,17 @@ class Model(object):
         model = tf.matmul(L3, W4)
         return model
 
-    def _loss_operation(self):
+    def _loss_op(self):
         one_hot_y = tf.one_hot(self.Y, 10)
-        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.logits, labels=one_hot_y))
+        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
 
+    def _accuracy_op(self):
+        is_correct = tf.equal(tf.argmax(self.inference_op, 1), self.Y)
+        return tf.reduce_mean(tf.cast(is_correct, tf.float32))
+        
 
 def train(model, X_train, y_train, batch_size=100, n_epoches=5):
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op)
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
@@ -57,7 +62,7 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
                 end = offset + batch_size
                 batch_x, batch_y = X_train[offset:end], y_train[offset:end]
     
-                _, cost_val = sess.run([optimizer, model.loss],
+                _, cost_val = sess.run([optimizer, model.loss_op],
                                        feed_dict={model.X: batch_x,
                                                   model.Y: batch_y})
                 total_cost += cost_val
@@ -72,20 +77,18 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5):
         saver.save(sess, 'models/cnn')
         # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
-def evaluate(model, images, labels, session, ckpt_directory=None):
+def evaluate(model, images, labels, session=None, ckpt_directory=None):
     # Todo : session 을 copy해서 별도의 객체를 생성하자.
     # session arg 를 그대로 사용하면 함수내부에서 session이 변경될 수 있다.
     
     # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
     # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
-    is_correct = tf.equal(tf.argmax(model.logits, 1), model.Y)
-    accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
-    
+
     if ckpt_directory:
         saver = tf.train.Saver()
         saver.restore(session, tf.train.latest_checkpoint(ckpt_directory))
         
-    print('Accuracy: ', session.run(accuracy,
+    print('Accuracy: ', session.run(model.accuracy_op,
                                     feed_dict={model.X: images,
                                                model.Y: labels}))
 

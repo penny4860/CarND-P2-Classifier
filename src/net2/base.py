@@ -5,13 +5,13 @@ class _Model(object):
     
     __metaclass__ = ABCMeta
     
-    def __init__(self, input_tensor):
+    def __init__(self):
         self.X = self._create_input_placeholder()
         self.Y = self._create_output_placeholder()
 
-        self.inference_op = self._inference_op()
-        self.loss_op = self._loss_op()
-        self.accuracy_op = self._accuracy_op()
+        self.inference_op = self._create_inference_op()
+        self.loss_op = self._create_loss_op()
+        self.accuracy_op = self._create_accuracy_op()
 
     @abstractmethod
     def _create_input_placeholder(self):

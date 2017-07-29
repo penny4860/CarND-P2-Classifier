@@ -49,7 +49,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         for offset, end in get_batch_index(len(X_train), batch_size):
             _, cost_val = sess.run([optimizer, model.loss_op],
                                    feed_dict={model.X: X_train[offset:end],
-                                              model.Y: y_train[offset:end]})
+                                              model.Y: y_train[offset:end],
+                                              model.is_training: True})
             total_cost += cost_val
         return total_cost
    
@@ -102,7 +103,8 @@ def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
         for offset, end in get_batch_index(len(images), batch_size):
             accuracy_value += sess.run(model.accuracy_op,
                                       feed_dict={model.X: images[offset:end],
-                                                 model.Y: labels[offset:end]})
+                                                 model.Y: labels[offset:end],
+                                                 model.is_training: False})
         accuracy_value = accuracy_value / get_n_batches(len(images), batch_size)
         return accuracy_value
 

@@ -9,6 +9,7 @@ class _Model(object):
     def __init__(self):
         self.X = self._create_input_placeholder()
         self.Y = self._create_output_placeholder()
+        self.is_training = self._create_is_train_placeholder()
 
         self.inference_op = self._create_inference_op()
         self.loss_op = self._create_loss_op()
@@ -33,6 +34,12 @@ class _Model(object):
     def _create_accuracy_op(self):
         is_correct = tf.equal(tf.argmax(self.inference_op, 1), self.Y)
         return tf.reduce_mean(tf.cast(is_correct, tf.float32))
+
+    def _create_is_train_placeholder(self):
+        is_training = tf.placeholder_with_default(tf.constant(False, dtype=tf.bool),
+                                                  shape=(),
+                                                  name='is_training')
+        return is_training
 
 
 def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ckpt=None):

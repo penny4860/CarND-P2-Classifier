@@ -36,13 +36,16 @@ class _Model(object):
 
 
 def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
-    
-    def _run_single_batch(batch_x, batch_y, pl_x, pl_y, optimize_op, loss_op):
-        _, cost_val = sess.run([optimize_op, loss_op],
-                               feed_dict={pl_x: batch_x,
-                                          pl_y: batch_y})
-        return cost_val
 
+    def _run_single_epoch(X_train, y_train, batch_size):
+        total_cost = 0
+        for offset, end in get_batch_index(len(X_train), batch_size):
+            _, cost_val = sess.run([optimizer, model.loss_op],
+                                   feed_dict={model.X: X_train[offset:end],
+                                              model.Y: y_train[offset:end]})
+            total_cost += cost_val
+        return total_cost
+   
     def _save(sess, ckpt, global_step):
         import os
         directory = os.path.dirname(ckpt)
@@ -67,16 +70,8 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
         
         for epoch in range(n_epoches):
             X_train, y_train = shuffle(X_train, y_train)
-            total_cost = 0
-            for offset, end in get_batch_index(len(X_train), batch_size):
-                cost_val = _run_single_batch(X_train[offset:end],
-                                             y_train[offset:end],
-                                             model.X,
-                                             model.Y,
-                                             optimizer,
-                                             model.loss_op)
-                total_cost += cost_val
-            _print_cost(epoch, total_cost / total_batch, sess.run(global_step))
+            cost = _run_single_epoch(X_train, y_train, batch_size)
+            _print_cost(epoch, cost / total_batch, sess.run(global_step))
             
             evaluate(model, X_train, y_train, sess, batch_size=batch_size)
 

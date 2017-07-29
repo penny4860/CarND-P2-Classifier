@@ -75,7 +75,7 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
             # saver.save(sess, 'models/cnn')
             # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
-def evaluate(model, images, labels, session=None, ckpt=None):
+def evaluate(model, images, labels, batch_size=100, session=None, ckpt=None):
     """
     ckpt : str
         ckpt directory or ckpt file
@@ -86,14 +86,33 @@ def evaluate(model, images, labels, session=None, ckpt=None):
         if ckpt:
             saver = tf.train.Saver()
             saver.restore(sess, tf.train.latest_checkpoint(ckpt))
-            
-        print('Accuracy: ', sess.run(model.accuracy_op,
-                                        feed_dict={model.X: images,
-                                                   model.Y: labels}))
+
+        accuracy_value = 0
+        for offset, end in get_batch_index(len(images), batch_size):
+            accuracy_value += sess.run(model.accuracy_op,
+                                      feed_dict={model.X: images[offset:end],
+                                                 model.Y: labels[offset:end]})
+        accuracy_value = accuracy_value / get_n_batches(len(images), batch_size)
+        return accuracy_value
 
     if session:
-        _evaluate(session)
+        accuracy = _evaluate(session)
     else:
         sess = tf.Session()
-        _evaluate(sess)
+        accuracy = _evaluate(sess)
         sess.close()
+        
+    print('Accuracy: {:.4f}'.format(accuracy))
+    return accuracy
+
+
+def get_batch_index(num_examples, batch_size=100):
+    for offset in range(0, num_examples, batch_size):
+        end = offset + batch_size
+        if end > num_examples:
+            break
+        yield (offset, end)
+
+def get_n_batches(num_examples, batch_size=100):
+    return int(num_examples / batch_size)
+

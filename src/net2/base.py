@@ -35,7 +35,7 @@ class _Model(object):
         return tf.reduce_mean(tf.cast(is_correct, tf.float32))
 
 
-def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
+def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ckpt=None):
 
     def _run_single_epoch(X_train, y_train, batch_size):
         total_cost = 0
@@ -74,6 +74,7 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
             _print_cost(epoch, cost / total_batch, sess.run(global_step))
             
             evaluate(model, X_train, y_train, sess, batch_size=batch_size)
+            evaluate(model, X_val, y_val, sess, batch_size=batch_size)
 
             if ckpt:
                 _save(sess, ckpt, global_step)

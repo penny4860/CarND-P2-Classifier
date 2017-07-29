@@ -36,52 +36,60 @@ class _Model(object):
 
 
 def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op)
+    
+    def _run_single_batch(batch_x, batch_y, pl_x, pl_y, optimize_op, loss_op):
+        _, cost_val = sess.run([optimize_op, loss_op],
+                               feed_dict={pl_x: batch_x,
+                                          pl_y: batch_y})
+        return cost_val
+
+    def _save(sess, ckpt, global_step):
+        import os
+        directory = os.path.dirname(ckpt)
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+            
+        saver = tf.train.Saver()
+        saver.save(sess, ckpt, global_step=global_step)
+        # saver.save(sess, 'models/cnn')
+        # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
+
+    def _print_cost(epoch, cost, global_step):
+        print('Epoch: {:3d}, Training Step: {:5d}, Avg. cost ={:.3f}'.format(epoch + 1, global_step, cost))
+    
+    global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op, global_step=global_step)
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
         sess.run(init)
-        num_examples = len(X_train)
-        total_batch = get_n_batches(num_examples, batch_size)
+        total_batch = get_n_batches(len(X_train), batch_size)
         
         for epoch in range(n_epoches):
-            total_cost = 0
-            
             X_train, y_train = shuffle(X_train, y_train)
-
-            for offset, end in get_batch_index(num_examples, batch_size):
-                batch_x, batch_y = X_train[offset:end], y_train[offset:end]
-    
-                _, cost_val = sess.run([optimizer, model.loss_op],
-                                       feed_dict={model.X: batch_x,
-                                                  model.Y: batch_y})
+            total_cost = 0
+            for offset, end in get_batch_index(len(X_train), batch_size):
+                cost_val = _run_single_batch(X_train[offset:end],
+                                             y_train[offset:end],
+                                             model.X,
+                                             model.Y,
+                                             optimizer,
+                                             model.loss_op)
                 total_cost += cost_val
-        
-            print('Epoch:', '%04d' % (epoch + 1),
-                  'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
+            _print_cost(epoch, total_cost / total_batch, sess.run(global_step))
             
             evaluate(model, X_train, y_train, sess, batch_size=batch_size)
+
+            if ckpt:
+                _save(sess, ckpt, global_step)
         
         print('Training done')
-        
-        if ckpt:
-            import os
-            directory = os.path.dirname(ckpt)
-            if not os.path.exists(directory):
-                os.mkdir(directory)
-                
-            saver = tf.train.Saver()
-            saver.save(sess, ckpt)
-            # saver.save(sess, 'models/cnn')
-            # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
 def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     """
     ckpt : str
         ckpt directory or ckpt file
     """
-    # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
-    # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
     def _evaluate(sess):
         if ckpt:
             saver = tf.train.Saver()

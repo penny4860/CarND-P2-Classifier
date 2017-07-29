@@ -200,13 +200,47 @@ class SignModel(_Model):
         one_hot_y = tf.one_hot(self.Y, 43)
         return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
 
+import tensorflow.contrib.slim as slim
+class SignModelBn(_Model):
+    def _create_input_placeholder(self):
+        return tf.placeholder(tf.float32, [None, 32, 32, 3])
+
+    def _create_inference_op(self):
+        batch_norm_params = {'is_training': self.is_training,
+                             'decay': 0.9,
+                             'updates_collections': None}
+
+        with slim.arg_scope([slim.conv2d, slim.fully_connected],
+                            normalizer_fn=slim.batch_norm,
+                            normalizer_params=batch_norm_params):
+
+            net = slim.conv2d(self.X, 32, [3, 3], scope='conv1_1')
+            net = slim.conv2d(net, 32, [3, 3], scope='conv1_2')
+            net = slim.max_pool2d(net, [2, 2], scope='pool1')
+
+            net = slim.conv2d(net, 64, [3, 3], scope='conv2_1')
+            net = slim.conv2d(net, 64, [3, 3], scope='conv2_2')
+            net = slim.max_pool2d(net, [2, 2], scope='pool2')
+            net = slim.flatten(net, scope='flatten3')
+
+            net = slim.fully_connected(net, 256, scope='fc3')
+            net = slim.fully_connected(net, 43, activation_fn=None,
+                                          normalizer_fn=None, scope='fco')
+        
+        return net
+
+    def _create_loss_op(self):
+        one_hot_y = tf.one_hot(self.Y, 43)
+        return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
+
+
 # 1. load dataset
 X_train, y_train, X_valid, y_valid, X_test, y_test = load_dataset()
 
 # 2. preprocess images
 X_train_prep, X_test_prep, X_valid_prep = preprocess(X_train), preprocess(X_test), preprocess(X_valid)
 
-model = SignModel()
+model = SignModelBn()
 train(model, X_train_prep, y_train, X_valid_prep, y_valid, batch_size=32, n_epoches=20, ckpt='ckpts/cnn')
 evaluate(model, X_test_prep, y_test, ckpt='ckpts')
 

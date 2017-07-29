@@ -41,15 +41,15 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
 
     with tf.Session() as sess:
         sess.run(init)
-        total_batch = len(X_train) / batch_size
         num_examples = len(X_train)
+        total_batch = get_n_batches(num_examples, batch_size)
         
         for epoch in range(n_epoches):
             total_cost = 0
             
             X_train, y_train = shuffle(X_train, y_train)
-            for offset in range(0, num_examples, batch_size):
-                end = offset + batch_size
+
+            for offset, end in get_batch_index(num_examples, batch_size):
                 batch_x, batch_y = X_train[offset:end], y_train[offset:end]
     
                 _, cost_val = sess.run([optimizer, model.loss_op],
@@ -60,7 +60,7 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
             print('Epoch:', '%04d' % (epoch + 1),
                   'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
             
-            evaluate(model, X_train, y_train, sess)
+            evaluate(model, X_train, y_train, sess, batch_size=batch_size)
         
         print('Training done')
         
@@ -75,7 +75,7 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
             # saver.save(sess, 'models/cnn')
             # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
-def evaluate(model, images, labels, batch_size=100, session=None, ckpt=None):
+def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     """
     ckpt : str
         ckpt directory or ckpt file

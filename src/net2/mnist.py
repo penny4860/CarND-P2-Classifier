@@ -40,6 +40,6 @@ if __name__ == '__main__':
     test_images = mnist.test.images.reshape(-1, 28, 28, 1)
     
     model = MnistCnn()
-    # train(model, train_images, mnist.train.labels, ckpt='ckpts/cnn')
+    train(model, train_images, mnist.train.labels, ckpt='ckpts/cnn')
     evaluate(model, test_images, mnist.test.labels, ckpt='ckpts')
     

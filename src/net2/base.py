@@ -90,8 +90,6 @@ def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     ckpt : str
         ckpt directory or ckpt file
     """
-    # Todo : accuracy op를 batch 별로 실행할 수 있도록 수정
-    # sample 숫자가 많으면 memory 문제로 평가가 불가능하다.
     def _evaluate(sess):
         if ckpt:
             saver = tf.train.Saver()

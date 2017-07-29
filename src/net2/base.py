@@ -36,7 +36,8 @@ class _Model(object):
 
 
 def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op)
+    global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op, global_step=global_step)
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
@@ -61,19 +62,19 @@ def train(model, X_train, y_train, batch_size=100, n_epoches=5, ckpt=None):
                   'Avg. cost =', '{:.3f}'.format(total_cost / total_batch))
             
             evaluate(model, X_train, y_train, sess, batch_size=batch_size)
+
+            if ckpt:
+                import os
+                directory = os.path.dirname(ckpt)
+                if not os.path.exists(directory):
+                    os.mkdir(directory)
+                    
+                saver = tf.train.Saver()
+                saver.save(sess, ckpt, global_step=global_step)
+                # saver.save(sess, 'models/cnn')
+                # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
         
         print('Training done')
-        
-        if ckpt:
-            import os
-            directory = os.path.dirname(ckpt)
-            if not os.path.exists(directory):
-                os.mkdir(directory)
-                
-            saver = tf.train.Saver()
-            saver.save(sess, ckpt)
-            # saver.save(sess, 'models/cnn')
-            # saver.save(sess, 'checkpoint_directory/model_name', global_step=model.global_step)
 
 def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     """

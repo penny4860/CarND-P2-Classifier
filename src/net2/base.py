@@ -16,13 +16,16 @@ class _Model(object):
         self.accuracy_op = self._create_accuracy_op()
         
         # Todo : private method extraction
-        with tf.name_scope('summary'):
-#             self.summary_op = tf.summary.scalar('loss', self.loss_op)
-#             # self.summary_op = tf.summary.merge_all()
+        with tf.name_scope('train_summary'):
+            summary_loss = tf.summary.scalar('loss', self.loss_op)
+            summary_acc = tf.summary.scalar('accuracy', self.accuracy_op)
+            self.train_summary_op = tf.summary.merge([summary_loss, summary_acc], name='train_summary')
 
-            tf.summary.scalar('loss', self.loss_op)
-            tf.summary.scalar('accuracy', self.accuracy_op)
-            self.summary_op = tf.summary.merge_all()
+        # Todo : private method extraction
+        with tf.name_scope('validation_summary'):
+            summary_acc = tf.summary.scalar('accuracy', self.accuracy_op)
+            #self.valid_summary_op = tf.summary.merge_all()
+            self.valid_summary_op = tf.summary.merge([summary_acc], name='valid_summary')
 
 
     @abstractmethod
@@ -57,7 +60,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
     def _run_single_epoch(X_train, y_train, batch_size):
         total_cost = 0
         for offset, end in get_batch_index(len(X_train), batch_size):
-            _, cost_val, summary_result = sess.run([optimizer, model.loss_op, model.summary_op],
+            _, cost_val, summary_result = sess.run([optimizer, model.loss_op, model.train_summary_op],
                                    feed_dict={model.X: X_train[offset:end],
                                               model.Y: y_train[offset:end],
                                               model.is_training: True})
@@ -96,8 +99,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
             cost = _run_single_epoch(X_train, y_train, batch_size)
             _print_cost(epoch, cost / total_batch, sess.run(global_step))
             
-            evaluate(model, X_train, y_train, sess, batch_size=batch_size)
-            evaluate(model, X_val, y_val, sess, batch_size=batch_size)
+            # evaluate(model, X_train, y_train, sess, batch_size=batch_size)
+            evaluate(model, X_val, y_val, sess, batch_size=batch_size, writer=writer, step=sess.run(global_step))
 
             if ckpt:
                 _save(sess, ckpt, global_step)
@@ -105,7 +108,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         print('Training done')
         writer.close()
 
-def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
+def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100, writer=None, step=None):
     """
     ckpt : str
         ckpt directory or ckpt file
@@ -117,10 +120,16 @@ def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
 
         accuracy_value = 0
         for offset, end in get_batch_index(len(images), batch_size):
-            accuracy_value += sess.run(model.accuracy_op,
-                                      feed_dict={model.X: images[offset:end],
-                                                 model.Y: labels[offset:end],
-                                                 model.is_training: False})
+            accuracy_value_, summary_result = sess.run([model.accuracy_op, model.valid_summary_op],
+                                                       feed_dict={model.X: images[offset:end],
+                                                                  model.Y: labels[offset:end],
+                                                                  model.is_training: False})
+
+            accuracy_value += accuracy_value_
+            
+            if writer:
+                writer.add_summary(summary_result, step)
+            
         accuracy_value = accuracy_value / get_n_batches(len(images), batch_size)
         return accuracy_value
 

@@ -15,9 +15,10 @@ class _Model(object):
         self.loss_op = self._create_loss_op()
         self.accuracy_op = self._create_accuracy_op()
         
+        # Todo : private method extraction
         with tf.name_scope('summary'):
-            tf.summary.scalar('loss', self.loss_op)
-            self.summary_op = tf.summary.merge_all()
+            self.summary_op = tf.summary.scalar('loss', self.loss_op)
+            # self.summary_op = tf.summary.merge_all()
 
     @abstractmethod
     def _create_input_placeholder(self):

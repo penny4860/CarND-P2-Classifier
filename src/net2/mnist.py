@@ -71,7 +71,7 @@ if __name__ == '__main__':
     valid_images = mnist.validation.images.reshape(-1, 28, 28, 1)
     test_images = mnist.test.images.reshape(-1, 28, 28, 1)
     
-    model = MnistBn()
+    model = MnistCnn()
     train(model, train_images, mnist.train.labels, valid_images, mnist.validation.labels, ckpt='ckpts/cnn')
     evaluate(model, test_images, mnist.test.labels, ckpt='ckpts')
     

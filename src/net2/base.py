@@ -21,6 +21,7 @@ class _Model(object):
 #             # self.summary_op = tf.summary.merge_all()
 
             tf.summary.scalar('loss', self.loss_op)
+            tf.summary.scalar('accuracy', self.accuracy_op)
             self.summary_op = tf.summary.merge_all()
 
 

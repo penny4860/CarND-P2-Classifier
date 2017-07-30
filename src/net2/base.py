@@ -17,7 +17,7 @@ class _Model(object):
 
     @abstractmethod
     def _create_input_placeholder(self):
-        return tf.placeholder(tf.float32, [None, 28, 28, 1])
+        return tf.placeholder(tf.float32, [None, 28, 28, 1], name='input_images')
 
     @abstractmethod
     def _create_inference_op(self):
@@ -29,7 +29,7 @@ class _Model(object):
         return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
 
     def _create_output_placeholder(self):
-        return tf.placeholder(tf.int64, [None])
+        return tf.placeholder(tf.int64, [None], name='output_labels')
 
     def _create_accuracy_op(self):
         is_correct = tf.equal(tf.argmax(self.inference_op, 1), self.Y)
@@ -76,6 +76,9 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         sess.run(init)
         total_batch = get_n_batches(len(X_train), batch_size)
         
+        # tensorboard --logdir="./graphs" --port 6006
+        writer = tf.summary.FileWriter('./graphs', sess.graph) 
+        
         for epoch in range(n_epoches):
             X_train, y_train = shuffle(X_train, y_train)
             cost = _run_single_epoch(X_train, y_train, batch_size)
@@ -88,6 +91,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
                 _save(sess, ckpt, global_step)
         
         print('Training done')
+        writer.close()
 
 def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     """

@@ -61,6 +61,11 @@ class _Model(object):
             return summary_op
 
 
+def run_summary(sess, summary_op, feed_dict, step=None):
+    summary_result = sess.run(summary_op, feed_dict=feed_dict)
+    return summary_result
+
+
 def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ckpt=None):
 
     def _run_single_epoch(X_train, y_train, batch_size):
@@ -106,7 +111,13 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
             _print_cost(epoch, cost / total_batch, sess.run(global_step))
             
             # evaluate(model, X_train, y_train, sess, batch_size=batch_size)
-            evaluate(model, X_val, y_val, sess, batch_size=batch_size, writer=writer, step=sess.run(global_step))
+            evaluate(model, X_val, y_val, sess, batch_size=batch_size)
+            
+            feed_dict={model.X: X_val,
+                       model.Y: y_val,
+                       model.is_training: False}
+            summary_valid = run_summary(sess, model.valid_summary_op, feed_dict, step=sess.run(global_step))
+            writer.add_summary(summary_valid, epoch)
 
             if ckpt:
                 _save(sess, ckpt, global_step)
@@ -133,8 +144,8 @@ def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100, wri
 
             accuracy_value += accuracy_value_
             
-            if writer:
-                writer.add_summary(summary_result, step)
+#             if writer:
+#                 writer.add_summary(summary_result, step)
             
         accuracy_value = accuracy_value / get_n_batches(len(images), batch_size)
         return accuracy_value

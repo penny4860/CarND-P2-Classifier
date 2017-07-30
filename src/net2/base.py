@@ -76,6 +76,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         sess.run(init)
         total_batch = get_n_batches(len(X_train), batch_size)
         
+        writer = tf.summary.FileWriter('./graphs', sess.graph) 
+        
         for epoch in range(n_epoches):
             X_train, y_train = shuffle(X_train, y_train)
             cost = _run_single_epoch(X_train, y_train, batch_size)
@@ -88,6 +90,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
                 _save(sess, ckpt, global_step)
         
         print('Training done')
+        writer.close()
 
 def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     """

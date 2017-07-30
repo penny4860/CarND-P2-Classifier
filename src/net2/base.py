@@ -14,6 +14,10 @@ class _Model(object):
         self.inference_op = self._create_inference_op()
         self.loss_op = self._create_loss_op()
         self.accuracy_op = self._create_accuracy_op()
+        
+        with tf.name_scope('summary'):
+            tf.summary.scalar('loss', self.loss_op)
+            self.summary_op = tf.summary.merge_all()
 
     @abstractmethod
     def _create_input_placeholder(self):
@@ -47,12 +51,11 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
     def _run_single_epoch(X_train, y_train, batch_size):
         total_cost = 0
         for offset, end in get_batch_index(len(X_train), batch_size):
-            _, cost_val, summary_result = sess.run([optimizer, model.loss_op, summary_op],
+            _, cost_val, summary_result = sess.run([optimizer, model.loss_op, model.summary_op],
                                    feed_dict={model.X: X_train[offset:end],
                                               model.Y: y_train[offset:end],
                                               model.is_training: True})
             total_cost += cost_val
-            
             writer.add_summary(summary_result, sess.run(global_step))
         return total_cost
    
@@ -80,7 +83,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         
         # tensorboard --logdir="./graphs" --port 6006
         writer = tf.summary.FileWriter('./graphs', sess.graph) 
-        summary_op = tf.summary.scalar('loss', model.loss_op)
+        # summary_op = tf.summary.scalar('loss', model.loss_op)
         
         for epoch in range(n_epoches):
             X_train, y_train = shuffle(X_train, y_train)

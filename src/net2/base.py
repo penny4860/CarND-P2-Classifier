@@ -61,7 +61,7 @@ class _Model(object):
             return summary_op
 
 
-def run_summary(sess, summary_op, feed_dict, step=None):
+def run_summary(sess, summary_op, feed_dict):
     summary_result = sess.run(summary_op, feed_dict=feed_dict)
     return summary_result
 
@@ -116,8 +116,8 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
             feed_dict={model.X: X_val,
                        model.Y: y_val,
                        model.is_training: False}
-            summary_valid = run_summary(sess, model.valid_summary_op, feed_dict, step=sess.run(global_step))
-            writer.add_summary(summary_valid, epoch)
+            summary_valid = run_summary(sess, model.valid_summary_op, feed_dict)
+            writer.add_summary(summary_valid, sess.run(global_step))
 
             if ckpt:
                 _save(sess, ckpt, global_step)

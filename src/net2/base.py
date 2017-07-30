@@ -17,8 +17,12 @@ class _Model(object):
         
         # Todo : private method extraction
         with tf.name_scope('summary'):
-            self.summary_op = tf.summary.scalar('loss', self.loss_op)
-            # self.summary_op = tf.summary.merge_all()
+#             self.summary_op = tf.summary.scalar('loss', self.loss_op)
+#             # self.summary_op = tf.summary.merge_all()
+
+            tf.summary.scalar('loss', self.loss_op)
+            self.summary_op = tf.summary.merge_all()
+
 
     @abstractmethod
     def _create_input_placeholder(self):

@@ -57,11 +57,6 @@ class _Model(object):
             return summary_op
 
 
-def run_summary(sess, summary_op, feed_dict):
-    summary_result = sess.run(summary_op, feed_dict=feed_dict)
-    return summary_result
-
-
 def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ckpt=None):
 
     def _run_single_epoch(X_train, y_train, batch_size):
@@ -88,6 +83,12 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
 
     def _print_cost(epoch, cost, global_step):
         print('Epoch: {:3d}, Training Step: {:5d}, Avg. cost ={:.3f}'.format(epoch + 1, global_step, cost))
+        
+    def _write_value_to_writer(value, writer, tag):
+        value_obj = tf.Summary.Value(tag=tag, simple_value=value)
+        summary_result = tf.Summary(value=[value_obj])
+        writer.add_summary(summary_result, sess.run(global_step))
+
     
     global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
     optimizer = tf.train.AdamOptimizer(0.001).minimize(model.loss_op, global_step=global_step)
@@ -102,21 +103,20 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         writer_val = tf.summary.FileWriter('./graphs/valid', sess.graph)
         
         for epoch in range(n_epoches):
+            # 1. shuffle
             X_train, y_train = shuffle(X_train, y_train)
+            
+            # 2. run training
             cost = _run_single_epoch(X_train, y_train, batch_size)
             _print_cost(epoch, cost / total_batch, sess.run(global_step))
             
+            # 3. evaluation accuracy
             train_accuracy = evaluate(model, X_train, y_train, sess, batch_size=batch_size)
             valid_accuracy = evaluate(model, X_val, y_val, sess, batch_size=batch_size)
 
-            v1 = tf.Summary.Value(tag="accuracy", simple_value=train_accuracy)
-            v2 = tf.Summary.Value(tag="accuracy", simple_value=valid_accuracy)
-
-            summary_result1 = tf.Summary(value=[v1])
-            summary_result2 = tf.Summary(value=[v2])
-            
-            writer.add_summary(summary_result1, sess.run(global_step))
-            writer_val.add_summary(summary_result2, sess.run(global_step))
+            # 4. logging
+            _write_value_to_writer(train_accuracy, writer, "accuracy")
+            _write_value_to_writer(valid_accuracy, writer_val, "accuracy")
 
             if ckpt:
                 _save(sess, ckpt, global_step)

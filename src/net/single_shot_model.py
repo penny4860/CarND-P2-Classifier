@@ -2,7 +2,8 @@
 
 """Sample Models to train small image patches"""
 
-
+# Todo : porting
+"""
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 from .model import _Model
@@ -74,3 +75,4 @@ class SingleShotSvhnModel(_Model):
 
         cost = (cost_for_detection + 10*cost_for_regression) / self.batch_size
         return cost
+"""

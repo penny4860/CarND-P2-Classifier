@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import tensorflow as tf
-from src.net2.base import _Model
+from src.net.base import _Model
 
 class MnistCnn(_Model):
 
@@ -63,7 +65,7 @@ class MnistBn(_Model):
 
 if __name__ == '__main__':
     from tensorflow.examples.tutorials.mnist import input_data
-    from src.net2.base import train, evaluate
+    from src.net.base import train, evaluate
 
     mnist = input_data.read_data_sets("./mnist/data/", one_hot=False)
     

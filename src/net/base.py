@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import tensorflow as tf
 from abc import ABCMeta, abstractmethod
 from sklearn.utils import shuffle

@@ -22,7 +22,6 @@ class _Model(object):
 
         # summary operations        
         self.train_summary_op = self._create_train_summary_op()
-        self.valid_summary_op = self._create_valid_summary_op()
         
     @abstractmethod
     def _create_input_placeholder(self):
@@ -55,12 +54,6 @@ class _Model(object):
             summary_loss = tf.summary.scalar('loss', self.loss_op)
             # summary_acc = tf.summary.scalar('accuracy', self.accuracy_op)
             summary_op = tf.summary.merge([summary_loss], name='train_summary')
-            return summary_op
-
-    def _create_valid_summary_op(self):
-        with tf.name_scope('validation_summary'):
-            summary_acc = tf.summary.scalar('accuracy', self.accuracy_op)
-            summary_op = tf.summary.merge([summary_acc], name='valid_summary')
             return summary_op
 
 

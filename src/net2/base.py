@@ -98,7 +98,9 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         total_batch = get_n_batches(len(X_train), batch_size)
         
         # tensorboard --logdir="./graphs" --port 6006
-        writer = tf.summary.FileWriter('./graphs', sess.graph) 
+        writer = tf.summary.FileWriter('./graphs', sess.graph)
+        writer_tr = tf.summary.FileWriter('./graphs/train', sess.graph)
+        writer_val = tf.summary.FileWriter('./graphs/valid', sess.graph)
         
         for epoch in range(n_epoches):
             X_train, y_train = shuffle(X_train, y_train)
@@ -108,11 +110,14 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
             train_accuracy = evaluate(model, X_train, y_train, sess, batch_size=batch_size)
             valid_accuracy = evaluate(model, X_val, y_val, sess, batch_size=batch_size)
 
-            v1 = tf.Summary.Value(tag="train_accuracy", simple_value=train_accuracy)
-            v2 = tf.Summary.Value(tag="valid_accuracy", simple_value=valid_accuracy)
+            v1 = tf.Summary.Value(tag="accuracy", simple_value=train_accuracy)
+            v2 = tf.Summary.Value(tag="accuracy", simple_value=valid_accuracy)
 
-            summary_result = tf.Summary(value=[v1, v2])
-            writer.add_summary(summary_result, sess.run(global_step))
+            summary_result1 = tf.Summary(value=[v1])
+            summary_result2 = tf.Summary(value=[v2])
+            
+            writer_tr.add_summary(summary_result1, sess.run(global_step))
+            writer_val.add_summary(summary_result2, sess.run(global_step))
 
             if ckpt:
                 _save(sess, ckpt, global_step)

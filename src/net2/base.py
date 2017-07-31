@@ -105,13 +105,14 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
             cost = _run_single_epoch(X_train, y_train, batch_size)
             _print_cost(epoch, cost / total_batch, sess.run(global_step))
             
-            # evaluate(model, X_train, y_train, sess, batch_size=batch_size)
+            train_accuracy = evaluate(model, X_train, y_train, sess, batch_size=batch_size)
             valid_accuracy = evaluate(model, X_val, y_val, sess, batch_size=batch_size)
-            
-            
-            v = tf.Summary.Value(tag="valid_accuracy", simple_value=valid_accuracy)
-            summary = tf.Summary(value=[v])
-            writer.add_summary(summary, sess.run(global_step))
+
+            v1 = tf.Summary.Value(tag="train_accuracy", simple_value=train_accuracy)
+            v2 = tf.Summary.Value(tag="valid_accuracy", simple_value=valid_accuracy)
+
+            summary_result = tf.Summary(value=[v1, v2])
+            writer.add_summary(summary_result, sess.run(global_step))
 
             if ckpt:
                 _save(sess, ckpt, global_step)

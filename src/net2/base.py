@@ -98,8 +98,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         total_batch = get_n_batches(len(X_train), batch_size)
         
         # tensorboard --logdir="./graphs" --port 6006
-        writer = tf.summary.FileWriter('./graphs', sess.graph)
-        writer_tr = tf.summary.FileWriter('./graphs/train', sess.graph)
+        writer = tf.summary.FileWriter('./graphs/train', sess.graph)
         writer_val = tf.summary.FileWriter('./graphs/valid', sess.graph)
         
         for epoch in range(n_epoches):
@@ -116,7 +115,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
             summary_result1 = tf.Summary(value=[v1])
             summary_result2 = tf.Summary(value=[v2])
             
-            writer_tr.add_summary(summary_result1, sess.run(global_step))
+            writer.add_summary(summary_result1, sess.run(global_step))
             writer_val.add_summary(summary_result2, sess.run(global_step))
 
             if ckpt:

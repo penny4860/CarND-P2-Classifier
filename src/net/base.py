@@ -4,8 +4,6 @@ import tensorflow as tf
 from abc import ABCMeta, abstractmethod
 from sklearn.utils import shuffle
 
-# Todo : evaluation summary를 batch별로 구해서 함하는 방법
-# Tensorboard에서 train/valid를 하나의 그래프에서 겹쳐서 display
 
 class _Model(object):
     

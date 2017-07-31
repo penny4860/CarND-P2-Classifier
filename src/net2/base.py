@@ -138,12 +138,10 @@ def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
 
         accuracy_value = 0
         for offset, end in get_batch_index(len(images), batch_size):
-            accuracy_value_ = sess.run(model.accuracy_op,
+            accuracy_value += sess.run(model.accuracy_op,
                                        feed_dict={model.X: images[offset:end],
                                                   model.Y: labels[offset:end],
                                                   model.is_training: False})
-
-            accuracy_value += accuracy_value_
             
         accuracy_value = accuracy_value / get_n_batches(len(images), batch_size)
         return accuracy_value

@@ -106,7 +106,6 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         
         # tensorboard --logdir="./graphs" --port 6006
         writer = tf.summary.FileWriter('./graphs', sess.graph) 
-        # summary_op = tf.summary.scalar('loss', model.loss_op)
         
         for epoch in range(n_epoches):
             X_train, y_train = shuffle(X_train, y_train)
@@ -128,7 +127,7 @@ def train(model, X_train, y_train, X_val, y_val, batch_size=100, n_epoches=5, ck
         print('Training done')
         writer.close()
 
-def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100, writer=None, step=None):
+def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100):
     """
     ckpt : str
         ckpt directory or ckpt file
@@ -146,9 +145,6 @@ def evaluate(model, images, labels, session=None, ckpt=None, batch_size=100, wri
                                                                   model.is_training: False})
 
             accuracy_value += accuracy_value_
-            
-#             if writer:
-#                 writer.add_summary(summary_result, step)
             
         accuracy_value = accuracy_value / get_n_batches(len(images), batch_size)
         return accuracy_value

@@ -83,7 +83,7 @@ for i in range(n_classes):
     plt.subplot(5, 9, i+1)
     plt.imshow(images[i])
     plt.axis("off")
-    plt.title("{}:\n {}".format(i, str_labels[i]))
+    plt.title("{}:\n {}".format(i, str_labels[i]), fontsize=8)
 plt.subplots_adjust(left=0, bottom=0, right=1.0, top=0.9, wspace=0.4, hspace=0.4)
 plt.show()
 

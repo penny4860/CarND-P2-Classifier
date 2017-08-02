@@ -75,16 +75,16 @@ print(images.shape)
 """
 Simple demo with multiple subplots.
 """
-plt.subplot(7, 7, 1)
-plt.imshow(images[0])
-plt.title('A tale of 2 subplots')
-plt.ylabel('Damped oscillation')
-
-plt.subplot(7, 7, 2)
-plt.imshow(images[1])
-plt.xlabel('time (s)')
-plt.ylabel('Undamped')
-
+fig, ax = plt.subplots()
+dataframe = pd.read_csv("../signnames.csv")
+str_labels = list(dataframe['SignName'])
+n_classes = 43
+for i in range(n_classes):
+    plt.subplot(5, 9, i+1)
+    plt.imshow(images[i])
+    plt.axis("off")
+    plt.title("{}:\n {}".format(i, str_labels[i]))
+plt.subplots_adjust(left=0, bottom=0, right=1.0, top=0.9, wspace=0.4, hspace=0.4)
 plt.show()
 
 

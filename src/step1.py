@@ -55,9 +55,18 @@ def plot_histogram(X, y, labels, title):
 
 
 # 1. Get one image for each class
+import cv2
 def get_images_for_each_class(X, y):
     def _image_by_class(X, y, i):
-        return X[y == i][0]
+        images = X[y == i]
+        grays = []
+        for image in images:
+            grays.append(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY))
+        grays = np.array(grays)
+            
+        contrast = np.max(grays.reshape(grays.shape[0], -1), axis=1) - np.min(grays.reshape(grays.shape[0], -1), axis=1)
+        # (180, 3072) (180,)
+        return images[np.argmax(contrast)]
 
     n_classes = len(np.unique(y))
     images = []

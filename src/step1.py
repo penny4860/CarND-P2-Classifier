@@ -78,7 +78,7 @@ Simple demo with multiple subplots.
 fig, ax = plt.subplots()
 dataframe = pd.read_csv("../signnames.csv")
 str_labels = list(dataframe['SignName'])
-n_classes = 43
+n_classes = len(str_labels)
 for i in range(n_classes):
     plt.subplot(5, 9, i+1)
     plt.imshow(images[i])

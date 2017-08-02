@@ -57,22 +57,22 @@ def plot_histogram(X, y, labels, title):
 # 1. Get one image for each class
 import cv2
 def get_images_for_each_class(X, y):
+    
+    def _hist_equ(image):
+        image[:,:,0] = cv2.equalizeHist(image[:,:,0])
+        image[:,:,1] = cv2.equalizeHist(image[:,:,1])
+        image[:,:,2] = cv2.equalizeHist(image[:,:,2])
+        return image
+    
     def _image_by_class(X, y, i):
-        images = X[y == i]
-        grays = []
-        for image in images:
-            image[:,:,0] = cv2.equalizeHist(image[:,:,0])
-            image[:,:,1] = cv2.equalizeHist(image[:,:,1])
-            image[:,:,2] = cv2.equalizeHist(image[:,:,2])
-            grays.append(image)
-        grays = np.array(image)
-        return grays
+        image = X[y == i][0]
+        image = _hist_equ(image)
+        return image
 
     n_classes = len(np.unique(y))
     images = []
     for i in range(n_classes):
         img = _image_by_class(X, y, i)
-        # img = cv2.equalizeHist(img)
         images.append(img)
     images = np.array(images)
     return images

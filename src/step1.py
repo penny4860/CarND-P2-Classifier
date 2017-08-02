@@ -59,8 +59,9 @@ def get_images_for_each_class(X, y):
     def _image_by_class(X, y, i):
         return X[y == i][0]
 
+    n_classes = len(np.unique(y))
     images = []
-    for i in range(43):
+    for i in range(n_classes):
         img = _image_by_class(X, y, i)
         images.append(img)
     images = np.array(images)

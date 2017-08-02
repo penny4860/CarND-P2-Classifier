@@ -46,11 +46,33 @@ def plot_histogram(X, y, labels, title):
     plt.show()
 
 
-dataframe = pd.read_csv("../signnames.csv")
-labels = list(dataframe['SignName'])
-plot_histogram(X_train, y_train, labels, "Training")
-plot_histogram(X_valid, y_valid, labels, "Valid")
-plot_histogram(X_test, y_test, labels, "Test")
+# dataframe = pd.read_csv("../signnames.csv")
+# labels = list(dataframe['SignName'])
+# plot_histogram(X_train, y_train, labels, "Training")
+# plot_histogram(X_valid, y_valid, labels, "Valid")
+# plot_histogram(X_test, y_test, labels, "Test")
+
+
+
+# 1. Get one image for each class
+def get_images_for_each_class(X, y):
+    def _image_by_class(X, y, i):
+        return X[y == i][0]
+
+    images = []
+    for i in range(43):
+        img = _image_by_class(X, y, i)
+        images.append(img)
+    images = np.array(images)
+    return images
+
+images = get_images_for_each_class(X_train, y_train)
+print(images.shape)
+
+
+# 2. subplot images
+
+
 
 
 

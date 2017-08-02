@@ -61,17 +61,18 @@ def get_images_for_each_class(X, y):
         images = X[y == i]
         grays = []
         for image in images:
-            grays.append(cv2.cvtColor(image, cv2.COLOR_RGB2GRAY))
-        grays = np.array(grays)
-            
-        contrast = np.max(grays.reshape(grays.shape[0], -1), axis=1) - np.min(grays.reshape(grays.shape[0], -1), axis=1)
-        # (180, 3072) (180,)
-        return images[np.argmax(contrast)]
+            image[:,:,0] = cv2.equalizeHist(image[:,:,0])
+            image[:,:,1] = cv2.equalizeHist(image[:,:,1])
+            image[:,:,2] = cv2.equalizeHist(image[:,:,2])
+            grays.append(image)
+        grays = np.array(image)
+        return grays
 
     n_classes = len(np.unique(y))
     images = []
     for i in range(n_classes):
         img = _image_by_class(X, y, i)
+        # img = cv2.equalizeHist(img)
         images.append(img)
     images = np.array(images)
     return images

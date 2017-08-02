@@ -71,8 +71,20 @@ print(images.shape)
 
 
 # 2. subplot images
+"""
+Simple demo with multiple subplots.
+"""
+plt.subplot(7, 7, 1)
+plt.imshow(images[0])
+plt.title('A tale of 2 subplots')
+plt.ylabel('Damped oscillation')
 
+plt.subplot(7, 7, 2)
+plt.imshow(images[1])
+plt.xlabel('time (s)')
+plt.ylabel('Undamped')
 
+plt.show()
 
 
 

@@ -77,25 +77,20 @@ def get_images_for_each_class(X, y):
     images = np.array(images)
     return images
 
+def plot_images(images, str_labels):
+    fig, ax = plt.subplots()
+    n_classes = len(str_labels)
+    for i in range(n_classes):
+        plt.subplot(5, 9, i+1)
+        plt.imshow(images[i])
+        plt.axis("off")
+        plt.title("{}:\n {}".format(i, str_labels[i]), fontsize=8)
+    plt.subplots_adjust(left=0, bottom=0, right=1.0, top=0.9, wspace=0.4, hspace=0.4)
+    plt.show()
+
 images = get_images_for_each_class(X_train, y_train)
-print(images.shape)
-
-
-# 2. subplot images
-"""
-Simple demo with multiple subplots.
-"""
-fig, ax = plt.subplots()
 dataframe = pd.read_csv("../signnames.csv")
 str_labels = list(dataframe['SignName'])
-n_classes = len(str_labels)
-for i in range(n_classes):
-    plt.subplot(5, 9, i+1)
-    plt.imshow(images[i])
-    plt.axis("off")
-    plt.title("{}:\n {}".format(i, str_labels[i]), fontsize=8)
-plt.subplots_adjust(left=0, bottom=0, right=1.0, top=0.9, wspace=0.4, hspace=0.4)
-plt.show()
-
+plot_images(images, str_labels)
 
 

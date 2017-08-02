@@ -74,7 +74,7 @@ def plot_histogram(X, y, labels, title):
     ax.set_yticklabels(labels)
     ax.invert_yaxis()  # labels read top-to-bottom
     ax.set_xlabel('number of samples for each label')
-    ax.set_title('{} Sample Distribution'.title)
+    ax.set_title('{} Sample Distribution'.format(title))
      
     plt.show()
 

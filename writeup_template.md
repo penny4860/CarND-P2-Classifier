@@ -155,8 +155,8 @@ Finally, the model of the 10870th step (10th epoch) was selected.
 	* VGG16 is known to be simple in architecture and easy to expand into other tasks. So I used this architecture.
 
 * How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
-	* 
-	* Validation accuracy는 training accuracy와 1.5% 떨어지는 인식률(98.48)을 보였다. Training accuracy와 validation accuracy의 작은 차이는 model이 overfitting되지 않았다는 증거이다.
+	* The accuracy of the training set was studied to be close to 100% (99.98%). This means that the model is very well suited to the traffic sign classification task.
+	* The validation accuracy showed a recognition rate (98.48) which is 1.5% lower than the training accuracy. A small difference in training accuracy and validation accuracy is evidence that the model is not overfitting.
 
 ###Test a Model on New Images
 
@@ -168,7 +168,7 @@ Here are five German traffic signs that I found on the web:
 ![alt text][test-2-speed-limit-50]  
 ![alt text][test-1-speed-limit-30] ![alt text][test-14-stop] ![alt text][test-15-no-vehicles] ![alt text][test-17-no-entry]
 
-stop sign image의 경우는 object의 위치가 image의 위쪽에 있고, 이미지의 가로, 세로 비율로 정사각형 형태가 아니기 때문에 분류가 어려울 것으로 보인다.
+In the case of a stop sign image, the position of the object is above the image, and it is difficult to classify it because the image is not square in the aspect ratio.
 
 
 ####2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
@@ -184,14 +184,16 @@ Here are the results of the prediction:
 | No entry				| No entry      							|
 
 
-The model was able to correctly guess 3 of the 5 traffic signs, which gives an accuracy of 60%. Test accuracy가 98.48% 인 것을 감안하면 매우 낮은 수치이다.
-웹에서 수집한 image들이 정사각형 형태가 아니고 직사각형 형태이기 때문에 이러한 결과가 나온 것 같다. 
+The model was able to correctly guess 3 of the 5 traffic signs, which gives an accuracy of 60%. 
+Considering the 98.48% test accuracy, this is very low.
+It seems that the results are coming out because the images collected on the web are rectangular rather than square.
 
 ####3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
 
 The code for making predictions on my final model is located in the 35th cell of the Ipython notebook.
 
-For the first image(2-speed-limit-50), the model is not sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For the first image(2-speed-limit-50), the model is not sure that this is a Speed limit 20 (probability of 0.43), and the image does contain a Speed limit 50. 
+The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
@@ -201,7 +203,8 @@ For the first image(2-speed-limit-50), the model is not sure that this is a stop
 | .01	      			| 17 (No entry)					 				|
 | .01				    | 11 (Right-of-way at the next intersection)     							|
 
-For the first image(1-speed-limit-30), the model is not sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For the next image(1-speed-limit-30), the model is sure that this is a stop sign (probability of 0.99), and the image does contain a Speed limit 30.
+The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
@@ -212,7 +215,8 @@ For the first image(1-speed-limit-30), the model is not sure that this is a stop
 | .00			    	| 0 (Speed limit (20km/h)  							|
 
 
-For the first image(14-stop), the model is not sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For the next image(14-stop), the model is not sure that this is a Priority road sign (probability of 0.99), and the image does contain a stop sign.
+The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
@@ -223,9 +227,8 @@ For the first image(14-stop), the model is not sure that this is a stop sign (pr
 | .00			    	| 41 (End of no passing)    							|
 
 
-For the first image(15-no-vehicles), the model is not sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-
+For the next image(15-no-vehicles), the model is sure that this is a no vehicle sign (probability of 0.98), and the image does contain a no vehicles sign.
+The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 
@@ -235,7 +238,8 @@ For the first image(15-no-vehicles), the model is not sure that this is a stop s
 | .00	      			| 14 (Stop)					 				|
 | .00			    	| 17 (No entry)    							|
 
-For the first image(17-no-entry), the model is not sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
+For the next image(17-no-entry), the model is sure that this is a no entry sign (probability of 0.99), and the image does contain a no entry sign.
+The top five soft max probabilities were
 
 | Probability         	|     Prediction	        					| 
 |:---------------------:|:---------------------------------------------:| 

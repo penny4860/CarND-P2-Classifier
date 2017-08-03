@@ -271,6 +271,25 @@ class SignModelBn(_Model):
         return tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.inference_op, labels=one_hot_y))
 
 
+def inference(model, images, ckpt):
+    sess = tf.Session()
+    saver = tf.train.Saver()
+    saver.restore(sess, ckpt)
+    
+    preds = sess.run(model.inference_op, feed_dict={model.X:images, model.is_training:False})
+    return np.argmax(preds, axis=1)
+    
+def top_k_probs(model, images, ckpt, k=3):
+    sess = tf.Session()
+    saver = tf.train.Saver()
+    saver.restore(sess, ckpt)
+    
+    probs_op = tf.nn.softmax(model.inference_op)
+    top_k_op = tf.nn.top_k(probs_op, k=k)
+    
+    result = sess.run(top_k_op, feed_dict={model.X:images, model.is_training:False})
+    return result
+
 if __name__ == '__main__':
 
     # 1. load dataset
@@ -280,9 +299,16 @@ if __name__ == '__main__':
     X_train_prep, X_test_prep, X_valid_prep = preprocess(X_train), preprocess(X_test), preprocess(X_valid)
     
     model = SignModelBn()
-    train(model, X_train_prep, y_train, X_valid_prep, y_valid, batch_size=32, n_epoches=20, ckpt='ckpts/cnn')
-    evaluate(model, X_test_prep, y_test, ckpt='ckpts')
+    #train(model, X_train_prep, y_train, X_valid_prep, y_valid, batch_size=32, n_epoches=20, ckpt='ckpts/cnn')
+    # evaluate(model, X_test_prep[:10], y_test[:10], ckpt='ckpts/cnn-10870', batch_size=10)
+    # print(inference(model, X_test_prep[:5], ckpt='ckpts/cnn-10870'))
+    # [16  1 38 33 11]
 
-
-
+    result = top_k_probs(model, X_test_prep[:5], ckpt='ckpts/cnn-10870')
+    print(result.values)
+    print(result.indices)
+    
+    
+    
+    
 
